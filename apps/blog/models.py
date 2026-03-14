@@ -7,11 +7,14 @@ from django.conf import settings
 User = settings.AUTH_USER_MODEL
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name_en = models.CharField(max_length=100, null=True, blank=True)
+    name_ru = models.CharField(max_length=100, null=True, blank=True)
+    name_kk = models.CharField(max_length=100, null=True, blank=True)
+    
     slug = models.SlugField(unique=True)
     
     def __str__(self) -> str:
-        return self.name
+        return self.name_en
     
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
