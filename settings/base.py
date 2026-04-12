@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from datetime import timedelta
 from pathlib import Path
+from decouple import config
 
+import settings
 from settings.conf import BLOG_ALLOWED_HOSTS, BLOG_DEBUG, BLOG_REDIS_URL, BLOG_SECRET_KEY
 
 # базовая папка проекта
@@ -27,15 +29,23 @@ DJANGO_APPS: list[str] = [
 THIRD_PARTY_APPS: list[str] = [
     'rest_framework',
     'rest_framework_simplejwt',
+    'channels'
 ]
 
 # локальные приложения
 LOCAL_APPS: list[str] = [
     'apps.users',
     'apps.blog',
+    'apps.notifications',
+    'apps.core'
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+#drf
+DRF_APPS: list[str] = [
+    'drf_spectacular'
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS + DRF_APPS
 
 # middleware
 MIDDLEWARE = [
@@ -68,6 +78,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'settings.wsgi.application'
 ASGI_APPLICATION = 'settings.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [BLOG_REDIS_URL],
+        }
+    }
+}
 
 # валидаторы пароля
 AUTH_PASSWORD_VALIDATORS = [
@@ -102,8 +121,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
+     "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # JWT
@@ -123,3 +149,19 @@ CACHES = {
         'KEY_PREFIX': 'blog',
     }
 }
+
+# Spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Blog API",
+    "DESCRIPTION": "Blog API with localization, caching and async stats",
+    "VERSION": "2.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@blog.local"
+
+#celery
+CELERY_BROKER_URL = config("BLOG_CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = config("BLOG_CELERY_BROKER_URL")

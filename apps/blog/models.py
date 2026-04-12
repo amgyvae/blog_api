@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 User = settings.AUTH_USER_MODEL
 
@@ -24,6 +25,7 @@ class Post(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         PUBLISHED = "published", "Published"
+        SCHEDULED = "scheduled", _("Scheduled")
         
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
@@ -48,6 +50,8 @@ class Post(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    publish_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Publish at"))
+    
     
     def __str__(self) -> str:
         return self.title
