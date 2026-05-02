@@ -1,0 +1,14 @@
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.idea/
+.vscode/
+*.log
+logs/
+dump.rdb
+db.sqlite3
+locale/**/django.mo
